@@ -1,8 +1,10 @@
 package com.github.tonybaines.metrics
 
+import io.kotlintest.matchers.collections.shouldContainInOrder
 import io.kotlintest.matchers.collections.shouldHaveSize
 import io.kotlintest.specs.StringSpec
 import java.io.File
+import java.time.Instant
 
 class AcceptanceTest : StringSpec({
 
@@ -10,5 +12,14 @@ class AcceptanceTest : StringSpec({
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/raw-metrics-data.txt"))
 
         parser.validRecords().shouldHaveSize(6)
+    }
+
+    "can parse a file containing only valid basic graphite format records"() {
+        val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/basic-graphite-valid.txt"))
+
+        parser.validRecords().shouldContainInOrder(
+            MetricRecord.BasicGraphiteMetric("some.metric.name", Value.from(1234), Instant.ofEpochSecond(1562763195)),
+            MetricRecord.BasicGraphiteMetric("another.metric.value.cpu%", Value.from("1.23e-1"), Instant.ofEpochSecond(1562763195))
+        )
     }
 })
