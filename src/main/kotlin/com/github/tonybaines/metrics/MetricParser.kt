@@ -19,19 +19,36 @@ sealed class MetricRecord() {
     ) : MetricRecord() {
         companion object {
             fun from(fields: List<String>): Try<GraphiteMetric> =
-                `try` { GraphiteMetric(fields[0], Value.from(fields[1]), fields[2].toInstant(), mapOf()) }
+                `try` {
+                    GraphiteMetric(
+                        id = fields[0].withoutTags(),
+                        value = Value.from(fields[1]),
+                        timestamp = fields[2].toInstant(),
+                        tags = fields[0].extractTags()
+                    )
+                }
+
+            private fun String.withoutTags(): String = this.takeWhile { it != ';' }
+
+            private fun String.extractTags(): Map<String, String> = this
+                .split(';')
+                .filter { it.contains('=') }
+                .map { it.split('=') }
+                .map { it[0] to it[1] }
+                .associate { it }
+
+            private fun String.toInstant(): Instant {
+                val epochTime = this.toLong()
+                // Timestamps may be seconds or milliseconds since the epoch
+                return if (epochTime > Instant.now().epochSecond * 10) {
+                    Instant.ofEpochMilli(epochTime)
+                } else {
+                    Instant.ofEpochSecond(epochTime)
+                }
+            }
         }
     }
 
-}
-
-private fun String.toInstant(): Instant {
-    val epochTime = this.toLong()
-    return if (epochTime > 2000000000) {
-        Instant.ofEpochMilli(epochTime)
-    } else {
-        Instant.ofEpochSecond(epochTime)
-    }
 }
 
 sealed class Value {

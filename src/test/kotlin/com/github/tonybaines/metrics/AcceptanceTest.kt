@@ -19,35 +19,35 @@ class AcceptanceTest : StringSpec({
 
         parser.validRecords().shouldContainInOrder(
             MetricRecord.GraphiteMetric(
-                "some.metric.name",
-                Value.from(1234),
-                Instant.ofEpochSecond(1562763195),
-                mapOf()
+                id = "some.metric.name",
+                value = Value.from(1234),
+                timestamp = Instant.ofEpochSecond(1562763195),
+                tags = mapOf()
             ),
             MetricRecord.GraphiteMetric(
-                "another.metric.value.cpu%",
-                Value.from("1.23e-1"),
-                Instant.ofEpochSecond(1562763195),
-                mapOf()
+                id = "another.metric.value.cpu%",
+                value = Value.from("1.23e-1"),
+                timestamp = Instant.ofEpochSecond(1562763195),
+                tags = mapOf()
             )
         )
     }
 
     "can parse a file containing only valid graphite format records with tags"() {
-        val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/basic-graphite-valid.txt"))
+        val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/graphite-valid-with-tags.txt"))
 
         parser.validRecords().shouldContainInOrder(
             MetricRecord.GraphiteMetric(
-                "some.metric.name",
-                Value.from(1234),
-                Instant.ofEpochSecond(1562763195),
-                mapOf("foo" to "bar")
+                id = "some.metric.name",
+                value = Value.from(1234),
+                timestamp = Instant.ofEpochSecond(1562763195),
+                tags = mapOf("foo" to "bar")
             ),
             MetricRecord.GraphiteMetric(
-                "another.metric.value.cpu%",
-                Value.from("1.23e-1"),
-                Instant.ofEpochSecond(1562763195),
-                mapOf("baz" to "bang", "answer" to "42")
+                id = "another.metric.value.cpu%",
+                value = Value.from("1.23e-1"),
+                timestamp = Instant.ofEpochSecond(1562763195),
+                tags = mapOf("baz" to "bang", "answer" to "42")
             )
         )
     }
