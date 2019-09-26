@@ -51,4 +51,12 @@ class AcceptanceTest : StringSpec({
             )
         )
     }
-})
+
+    "can parse a file containing only valid carbon 2.0 format records"() {
+        val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/carbon-format.txt"))
+
+        parser.validRecords().shouldHaveSize(6)
+    }
+
+
+    })
