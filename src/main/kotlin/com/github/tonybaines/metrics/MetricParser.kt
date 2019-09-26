@@ -8,16 +8,19 @@ import java.time.Instant
 sealed class MetricRecord() {
     companion object {
         fun from(fields: List<String>): Try<out MetricRecord> =
-            BasicGraphiteMetric.from(fields)
+            GraphiteMetric.from(fields)
     }
 
-    data class BasicGraphiteMetric(val id: String, val value: Value, val timestamp: Instant) : MetricRecord() {
+    data class GraphiteMetric(
+        val id: String,
+        val value: Value,
+        val timestamp: Instant,
+        val tags: Map<String, String> = mapOf()
+    ) : MetricRecord() {
         companion object {
-            fun from(fields: List<String>): Try<BasicGraphiteMetric> =
-                `try` { BasicGraphiteMetric(fields[0], Value.from(fields[1]), fields[2].toInstant()) }
+            fun from(fields: List<String>): Try<GraphiteMetric> =
+                `try` { GraphiteMetric(fields[0], Value.from(fields[1]), fields[2].toInstant(), mapOf()) }
         }
-
-        override fun toString(): String = "[$timestamp : '$id' = '$value']"
     }
 
 }
@@ -43,14 +46,8 @@ sealed class Value {
             get() = this.toLongOrNull() != null
     }
 
-    data class LongValue(val value: Long) : Value() {
-        override fun toString(): String = value.toString()
-    }
-
-    data class DoubleValue(val value: Double) : Value() {
-        override fun toString(): String = value.toString()
-    }
-
+    data class LongValue(val value: Long) : Value()
+    data class DoubleValue(val value: Double) : Value()
 }
 
 class MetricParser(private val input: List<String>) {

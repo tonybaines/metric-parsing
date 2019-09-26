@@ -18,8 +18,37 @@ class AcceptanceTest : StringSpec({
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/basic-graphite-valid.txt"))
 
         parser.validRecords().shouldContainInOrder(
-            MetricRecord.BasicGraphiteMetric("some.metric.name", Value.from(1234), Instant.ofEpochSecond(1562763195)),
-            MetricRecord.BasicGraphiteMetric("another.metric.value.cpu%", Value.from("1.23e-1"), Instant.ofEpochSecond(1562763195))
+            MetricRecord.GraphiteMetric(
+                "some.metric.name",
+                Value.from(1234),
+                Instant.ofEpochSecond(1562763195),
+                mapOf()
+            ),
+            MetricRecord.GraphiteMetric(
+                "another.metric.value.cpu%",
+                Value.from("1.23e-1"),
+                Instant.ofEpochSecond(1562763195),
+                mapOf()
+            )
+        )
+    }
+
+    "can parse a file containing only valid graphite format records with tags"() {
+        val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/basic-graphite-valid.txt"))
+
+        parser.validRecords().shouldContainInOrder(
+            MetricRecord.GraphiteMetric(
+                "some.metric.name",
+                Value.from(1234),
+                Instant.ofEpochSecond(1562763195),
+                mapOf("foo" to "bar")
+            ),
+            MetricRecord.GraphiteMetric(
+                "another.metric.value.cpu%",
+                Value.from("1.23e-1"),
+                Instant.ofEpochSecond(1562763195),
+                mapOf("baz" to "bang", "answer" to "42")
+            )
         )
     }
 })

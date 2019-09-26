@@ -1,0 +1,2 @@
+some.metric.name;foo=bar 1234 1562763195
+another.metric.value.cpu%;baz=bang;answer=42 1.23e-1 1562763195000
