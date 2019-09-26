@@ -14,7 +14,8 @@ test {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    compile 'io.vavr:vavr-kotlin:0.10.0'
     testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
 }
 
