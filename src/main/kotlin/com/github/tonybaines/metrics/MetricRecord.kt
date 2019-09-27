@@ -25,10 +25,15 @@ sealed class MetricRecord {
         val value: Value,
         val timestamp: Instant
     ) : MetricRecord() {
+        init {
+            // Validation
+            intrinsicTags.ensureComplete()
+            intrinsicTags.validateTags(CARBON_TAG_VALUE_PATTERN)
+            extrinsicTags.validateTags(CARBON_TAG_VALUE_PATTERN)
+        }
         companion object {
             fun from(fields: List<String>): Try<MetricRecord> =
                 `try` {
-                    if (fields.size < 3) throw java.lang.IllegalArgumentException("Not enough fields after splitting")
                     // Easier to work with in reverse, since the last two items are known
                     val reversed = fields.asReversed()
                     val tagList = reversed.drop(2)
@@ -40,6 +45,8 @@ sealed class MetricRecord {
                         extrinsicTags = tagList.extrinsicTags()
                     )
                 }
+
+            private val CARBON_TAG_VALUE_PATTERN = """[_+%\-/\w]+""".toRegex()
         }
     }
 
@@ -49,11 +56,16 @@ sealed class MetricRecord {
         val timestamp: Instant,
         val tags: Tags = mapOf()
     ) : MetricRecord() {
+        init {
+            // Validation
+            id.ensureValidMetricName()
+            tags.validateTags(valuePattern = GRAPHITE_TAG_VALUE_PATTERN)
+        }
         companion object {
             fun from(fields: List<String>): Try<MetricRecord> =
                 `try` {
                     GraphiteMetric(
-                        id = fields[0].withoutTags().ensureValidMetricName(),
+                        id = fields[0].withoutTags(),
                         value = Value.from(fields[1]),
                         timestamp = fields[2].toInstant(),
                         tags = fields[0].extractTags()
@@ -65,7 +77,7 @@ sealed class MetricRecord {
             private val GRAPHITE_TAG_VALUE_PATTERN = """[_+%\-\w]+""".toRegex()
             private fun String.extractTags(): Tags = this
                 .split(';')
-                .asTags(tagValuePattern = GRAPHITE_TAG_VALUE_PATTERN)
+                .asTags()
         }
     }
 }
@@ -81,7 +93,6 @@ sealed class Value {
             s.matches("""[+]?inf(inity)?""".toRegex(RegexOption.IGNORE_CASE)) -> DoubleValue(Double.POSITIVE_INFINITY)
             else -> DoubleValue(s.toDouble())
         }
-
     }
 
     data class LongValue(override val value: Long) : Value()

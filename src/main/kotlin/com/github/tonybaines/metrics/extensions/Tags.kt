@@ -3,11 +3,10 @@ package com.github.tonybaines.metrics.extensions
 typealias Tags = Map<String, String>
 
 
-fun List<String>.asTags(tagValuePattern: Regex): Tags = this
+fun List<String>.asTags(): Tags = this
     .filter { tagPairs -> tagPairs.contains('=') }
     .map { tagPair -> tagPair.split('=') }
     .associate { pair -> pair[0] to pair[1] }
-    .validateTags(valuePattern = tagValuePattern)
 
 fun Tags.validateTags(valuePattern: Regex): Tags =
     this.onEach { entry ->
@@ -27,22 +26,19 @@ private fun String.ensureValidTagValue(pattern: Regex): String =
 
 
 // Carbon 2.0 format tags
-private val INTRINSIC_TAGS = setOf("unit", "mtype")
-private val isIntrinsic: (String) -> Boolean = { key -> INTRINSIC_TAGS.contains(key) }
-private val CARBON_TAG_VALUE_PATTERN = """[_+%\-/\w]+""".toRegex()
 
 fun List<String>.intrinsicTags(): Tags =
-    this.asTags(CARBON_TAG_VALUE_PATTERN).filterKeys(isIntrinsic).validateContains(
-        INTRINSIC_TAGS
-    )
+    this.asTags().filterKeys(isIntrinsic)
 
 fun List<String>.extrinsicTags(): Tags =
-    this.asTags(CARBON_TAG_VALUE_PATTERN).filterKeys {
+    this.asTags().filterKeys {
         !isIntrinsic(
             it
         )
     }
 
-private fun Tags.validateContains(requiredKeys: Set<String>): Tags =
-    if (this.keys == requiredKeys) this
-    else throw IllegalStateException("Required keys $requiredKeys not found in ${this.keys}")
+private val INTRINSIC_TAGS = setOf("unit", "mtype")
+private val isIntrinsic: (String) -> Boolean = { key -> INTRINSIC_TAGS.contains(key) }
+fun Tags.ensureComplete(): Tags =
+    if (this.keys == INTRINSIC_TAGS) this
+    else throw IllegalArgumentException("Required keys $INTRINSIC_TAGS not found in ${this.keys}")
