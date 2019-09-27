@@ -62,21 +62,20 @@ class AcceptanceTest : StringSpec({
                 extrinsicTags = mapOf("site" to "mydomain", "host" to "web12", "agent" to "statsdaemon1"),
                 value = Value.LongValue(234),
                 timestamp = Instant.ofEpochSecond(1560852124)
-                ),
+            ),
             MetricRecord.CarbonMetric(
                 intrinsicTags = mapOf("mtype" to "rate", "unit" to "Req/s"),
                 extrinsicTags = mapOf("site" to "mydomain", "host" to "web12"),
                 value = Value.DoubleValue(3.0e8),
                 timestamp = Instant.ofEpochSecond(1560852124)
-                ),
+            ),
             MetricRecord.CarbonMetric(
                 intrinsicTags = mapOf("mtype" to "rate", "unit" to "WtF/s"),
-                extrinsicTags = mapOf(),
                 value = Value.LongValue(10),
                 timestamp = Instant.ofEpochSecond(1560852124)
-                )
+            )
         )
     }
 
 
-    })
+})
