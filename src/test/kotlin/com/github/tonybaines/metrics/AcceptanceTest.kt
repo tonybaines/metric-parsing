@@ -55,7 +55,27 @@ class AcceptanceTest : StringSpec({
     "can parse a file containing only valid carbon 2.0 format records"() {
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/carbon-format.txt"))
 
-        parser.validRecords().shouldHaveSize(6)
+        parser.validRecords().shouldHaveSize(3)
+        parser.validRecords().shouldContainInOrder(
+            MetricRecord.CarbonMetric(
+                intrinsicTags = mapOf("mtype" to "rate", "unit" to "Req/s"),
+                extrinsicTags = mapOf("site" to "mydomain", "host" to "web12", "agent" to "statsdaemon1"),
+                value = Value.LongValue(234),
+                timestamp = Instant.ofEpochSecond(1560852124)
+                ),
+            MetricRecord.CarbonMetric(
+                intrinsicTags = mapOf("mtype" to "rate", "unit" to "Req/s"),
+                extrinsicTags = mapOf("site" to "mydomain", "host" to "web12"),
+                value = Value.DoubleValue(3.0e8),
+                timestamp = Instant.ofEpochSecond(1560852124)
+                ),
+            MetricRecord.CarbonMetric(
+                intrinsicTags = mapOf("mtype" to "rate", "unit" to "WtF/s"),
+                extrinsicTags = mapOf("site" to "mydomain", "host" to "web12"),
+                value = Value.LongValue(10),
+                timestamp = Instant.ofEpochSecond(1560852124)
+                )
+        )
     }
 
 

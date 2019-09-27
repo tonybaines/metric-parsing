@@ -1,6 +1,3 @@
-test_metric.value 100 1560852124
-test_metric.value -100.25 1560852124
-test_metric.value 0.25 1560852124
-test_metric.value;label1=value1;label2=value2 Inf 1560852124000
 site=mydomain mtype=rate unit=Req/s host=web12 agent=statsdaemon1 234 1560852124
-site=mydomain mtype=rate unit=Req/s host=web12 234 1560852124
+site=mydomain mtype=rate unit=Req/s host=web12 3e8 1560852124
+unit=WtF/s mtype=rate 10 1560852124000
