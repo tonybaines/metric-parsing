@@ -71,7 +71,7 @@ class AcceptanceTest : StringSpec({
                 ),
             MetricRecord.CarbonMetric(
                 intrinsicTags = mapOf("mtype" to "rate", "unit" to "WtF/s"),
-                extrinsicTags = mapOf("site" to "mydomain", "host" to "web12"),
+                extrinsicTags = mapOf(),
                 value = Value.LongValue(10),
                 timestamp = Instant.ofEpochSecond(1560852124)
                 )
