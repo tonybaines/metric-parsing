@@ -1,23 +1,28 @@
 package com.github.tonybaines.metrics
 
-import io.kotlintest.matchers.collections.shouldContainInOrder
-import io.kotlintest.matchers.collections.shouldHaveSize
-import io.kotlintest.specs.StringSpec
+import org.junit.jupiter.api.Test
+import strikt.api.expectThat
+import strikt.assertions.containsExactly
+import strikt.assertions.containsExactlyInAnyOrder
+import strikt.assertions.hasSize
 import java.io.File
 import java.time.Instant
 
-class AcceptanceTest : StringSpec({
+class AcceptanceTest {
 
-    "can parse a file with a mix of valid and invalid records" {
+    @Test
+    fun `can parse a file with a mix of valid and invalid records`() {
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/raw-metrics-data.txt"))
 
-        parser.validRecords().shouldHaveSize(6)
+        expectThat(parser.validRecords())
+            .hasSize(6)
     }
 
-    "can parse a file containing only valid basic graphite format records"() {
+    @Test
+    fun `can parse a file containing only valid basic graphite format records`() {
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/basic-graphite-valid.txt"))
 
-        parser.validRecords().shouldContainInOrder(
+        expectThat(parser.validRecords()).containsExactlyInAnyOrder(
             MetricRecord.GraphiteMetric(
                 id = "some.metric.name",
                 value = Value.from(1234),
@@ -33,10 +38,11 @@ class AcceptanceTest : StringSpec({
         )
     }
 
-    "can parse a file containing only valid graphite format records with tags"() {
+    @Test
+    fun `can parse a file containing only valid graphite format records with tags`() {
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/graphite-valid-with-tags.txt"))
 
-        parser.validRecords().shouldContainInOrder(
+        expectThat(parser.validRecords()).containsExactly(
             MetricRecord.GraphiteMetric(
                 id = "some.metric.name",
                 value = Value.from(1234),
@@ -52,11 +58,11 @@ class AcceptanceTest : StringSpec({
         )
     }
 
-    "can parse a file containing only valid carbon 2.0 format records"() {
+    @Test
+    fun `can parse a file containing only valid carbon 2_0 format records`() {
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/carbon-format.txt"))
 
-        parser.validRecords().shouldHaveSize(3)
-        parser.validRecords().shouldContainInOrder(
+        expectThat(parser.validRecords()).containsExactly(
             MetricRecord.CarbonMetric(
                 intrinsicTags = mapOf("mtype" to "rate", "unit" to "Req/s"),
                 extrinsicTags = mapOf("site" to "mydomain", "host" to "web12", "agent" to "statsdaemon1"),
@@ -78,4 +84,4 @@ class AcceptanceTest : StringSpec({
     }
 
 
-})
+}
