@@ -15,7 +15,7 @@ class AcceptanceTest {
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/raw-metrics-data.txt"))
 
         expectThat(parser.validRecords())
-            .hasSize(6)
+            .hasSize(7)
     }
 
     @Test
@@ -25,13 +25,13 @@ class AcceptanceTest {
         expectThat(parser.validRecords()).containsExactlyInAnyOrder(
             MetricRecord.GraphiteMetric(
                 id = "some.metric.name",
-                value = Value.from(1234),
+                value = Value.LongValue(1234),
                 timestamp = Instant.ofEpochSecond(1562763195),
                 tags = mapOf()
             ),
             MetricRecord.GraphiteMetric(
                 id = "another.metric.value.cpu%",
-                value = Value.from("1.23e-1"),
+                value = Value.DoubleValue(1.23e-1),
                 timestamp = Instant.ofEpochSecond(1562763195),
                 tags = mapOf()
             )
@@ -45,13 +45,13 @@ class AcceptanceTest {
         expectThat(parser.validRecords()).containsExactly(
             MetricRecord.GraphiteMetric(
                 id = "some.metric.name",
-                value = Value.from(1234),
+                value = Value.LongValue(1234),
                 timestamp = Instant.ofEpochSecond(1562763195),
                 tags = mapOf("foo" to "bar")
             ),
             MetricRecord.GraphiteMetric(
                 id = "another.metric.value.cpu%",
-                value = Value.from("1.23e-1"),
+                value = Value.DoubleValue(1.23e-1),
                 timestamp = Instant.ofEpochSecond(1562763195),
                 tags = mapOf("baz" to "bang", "answer" to "42")
             )
