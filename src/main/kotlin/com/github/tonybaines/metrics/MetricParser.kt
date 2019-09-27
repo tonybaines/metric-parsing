@@ -13,7 +13,7 @@ sealed class MetricRecord {
     companion object {
         fun from(fields: List<String>): Try<out MetricRecord> =
             CarbonMetric.from(fields)
-                .orElse{GraphiteMetric.from(fields)}
+                .orElse { GraphiteMetric.from(fields) }
 
         private fun String.toInstant(): Instant {
             val epochTime = this.toLong()
@@ -27,11 +27,11 @@ sealed class MetricRecord {
     }
 
     data class CarbonMetric(
-        val intrinsicTags:Tags,
-        val extrinsicTags:Tags = mapOf(),
+        val intrinsicTags: Tags,
+        val extrinsicTags: Tags = mapOf(),
         val value: Value,
         val timestamp: Instant
-        ) : MetricRecord() {
+    ) : MetricRecord() {
         companion object {
 
             val INTRINSIC_TAGS = setOf("unit", "mtype")
@@ -53,7 +53,7 @@ sealed class MetricRecord {
             private fun List<String>.intrinsicTags(): Tags =
                 this.asMap().filterKeys(isIntrinsic)
 
-            private fun List<String>.extrinsicTags(): Tags = this.asMap().filterKeys{ !isIntrinsic(it)}
+            private fun List<String>.extrinsicTags(): Tags = this.asMap().filterKeys { !isIntrinsic(it) }
 
             private fun List<String>.asMap(): Tags = this
                 .filter { tagPairs -> tagPairs.contains('=') }
