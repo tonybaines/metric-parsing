@@ -1,0 +1,7 @@
+version: '2'
+
+services:
+  metric-parser:
+    image: com.github.tonybaines/metric-parsing:1.0-SNAPSHOT
+    ports:
+      - "8080:8080"
