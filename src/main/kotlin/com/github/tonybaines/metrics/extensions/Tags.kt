@@ -27,18 +27,7 @@ private fun String.ensureValidTagValue(pattern: Regex): String =
 
 // Carbon 2.0 format tags
 
-fun List<String>.intrinsicTags(): Tags =
-    this.asTags().filterKeys(isIntrinsic)
-
-fun List<String>.extrinsicTags(): Tags =
-    this.asTags().filterKeys {
-        !isIntrinsic(
-            it
-        )
-    }
-
 private val INTRINSIC_TAGS = setOf("unit", "mtype")
-private val isIntrinsic: (String) -> Boolean = { key -> INTRINSIC_TAGS.contains(key) }
 fun Tags.ensureComplete(): Tags =
-    if (this.keys == INTRINSIC_TAGS) this
+    if (this.keys.containsAll(INTRINSIC_TAGS)) this
     else throw IllegalArgumentException("Required keys $INTRINSIC_TAGS not found in ${this.keys}")

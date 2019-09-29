@@ -64,14 +64,14 @@ class AcceptanceTest {
 
         expectThat(parser.validRecords()).containsExactly(
             MetricRecord.CarbonMetric(
-                intrinsicTags = mapOf("mtype" to "rate", "unit" to "Req/s"),
-                extrinsicTags = mapOf("site" to "mydomain", "host" to "web12", "agent" to "statsdaemon1"),
+                intrinsicTags = mapOf("mtype" to "rate", "unit" to "Req/s", "site" to "mydomain", "host" to "web12"),
+                metaTags = mapOf("agent" to "statsdaemon1"),
                 value = Value.LongValue(234),
                 timestamp = Instant.ofEpochSecond(1560852124)
             ),
             MetricRecord.CarbonMetric(
-                intrinsicTags = mapOf("mtype" to "rate", "unit" to "Req/s"),
-                extrinsicTags = mapOf("site" to "mydomain", "host" to "web12"),
+                intrinsicTags = mapOf("mtype" to "rate", "unit" to "Req/s", "site" to "mydomain", "host" to "web12"),
+                metaTags = mapOf(),
                 value = Value.DoubleValue(3.0e8),
                 timestamp = Instant.ofEpochSecond(1560852124)
             ),

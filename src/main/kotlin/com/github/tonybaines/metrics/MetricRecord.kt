@@ -8,9 +8,9 @@ import java.time.Instant
 
 sealed class MetricRecord {
     companion object {
-        fun from(fields: List<String>): Try<out MetricRecord> =
-            CarbonMetric.from(fields)
-                .orElse { GraphiteMetric.from(fields) }
+        fun from(line: String): Try<out MetricRecord> =
+            CarbonMetric.from(line)
+                .orElse { GraphiteMetric.from(line) }
 
         private val VALID_METRIC_NAME_PATTERN = """[a-zA-Z]+[_+%\-\w.]+""".toRegex()
         private fun String.ensureValidMetricName(): String =
@@ -21,7 +21,7 @@ sealed class MetricRecord {
 
     data class CarbonMetric(
         val intrinsicTags: Tags,
-        val extrinsicTags: Tags = mapOf(),
+        val metaTags: Tags = mapOf(),
         val value: Value,
         val timestamp: Instant
     ) : MetricRecord() {
@@ -29,21 +29,34 @@ sealed class MetricRecord {
             // Validation
             intrinsicTags.ensureComplete()
             intrinsicTags.validateTags(CARBON_TAG_VALUE_PATTERN)
-            extrinsicTags.validateTags(CARBON_TAG_VALUE_PATTERN)
+            metaTags.validateTags(CARBON_TAG_VALUE_PATTERN)
         }
         companion object {
-            fun from(fields: List<String>): Try<MetricRecord> =
+            fun from(line: String): Try<MetricRecord> =
                 `try` {
-                    // Easier to work with in reverse, since the last two items are known
-                    val reversed = fields.asReversed()
-                    val tagList = reversed.drop(2)
+                    val startOfMetaTags = line.indexOf("  ")
+                    val hasMetaTags = (startOfMetaTags > 0) && (startOfMetaTags < line.length)
 
-                    CarbonMetric(
-                        timestamp = reversed[0].toInstant(),
-                        value = Value.from(reversed[1]),
-                        intrinsicTags = tagList.intrinsicTags(),
-                        extrinsicTags = tagList.extrinsicTags()
-                    )
+                    if (hasMetaTags) {
+                        val intrinsicTags = line.substring(0..startOfMetaTags).split(' ')
+                        val metaAndRest = line.substring(startOfMetaTags).split(' ').reversed()
+                        val metaTags = metaAndRest.drop(2)
+                        CarbonMetric(
+                            timestamp = metaAndRest[0].toInstant(),
+                            value = Value.from(metaAndRest[1]),
+                            intrinsicTags = intrinsicTags.asTags(),
+                            metaTags = metaTags.asTags()
+                        )
+                    } else {
+                        val intrinsicAndRest = line.split(' ').reversed()
+                        val intrinsicTags = intrinsicAndRest.drop(2)
+                        CarbonMetric(
+                            timestamp = intrinsicAndRest[0].toInstant(),
+                            value = Value.from(intrinsicAndRest[1]),
+                            intrinsicTags = intrinsicTags.asTags(),
+                            metaTags = mapOf()
+                        )
+                    }
                 }
 
             private val CARBON_TAG_VALUE_PATTERN = """[_+%\-/\w]+""".toRegex()
@@ -62,8 +75,9 @@ sealed class MetricRecord {
             tags.validateTags(valuePattern = GRAPHITE_TAG_VALUE_PATTERN)
         }
         companion object {
-            fun from(fields: List<String>): Try<MetricRecord> =
+            fun from(line: String): Try<MetricRecord> =
                 `try` {
+                    val fields = line.split(' ')
                     GraphiteMetric(
                         id = fields[0].withoutTags(),
                         value = Value.from(fields[1]),
