@@ -1,8 +1,33 @@
+
+buildscript {
+    repositories {
+        mavenLocal()
+        maven {
+            url = "http://jcenter.bintray.com"
+        }
+    }
+    dependencies {
+        classpath 'se.transmode.gradle:gradle-docker:1.2'
+    }
+}
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.50'
     id 'com.github.johnrengelman.shadow' version '5.1.0'
     id 'com.adarshr.test-logger' version '1.7.0'
     id "io.vertx.vertx-plugin" version "0.8.0"
+}
+
+apply plugin: 'docker'
+
+docker {
+    baseImage = 'openjdk:11-jre'
+    useApi = false
+}
+
+distDocker {
+    exposePort(8080)
+    entryPoint(['metric-parsing-1.0-SNAPSHOT/bin/metric-parsing'])
+    defaultCommand(['run', 'com.github.tonybaines.metrics.HttpServer'])
 }
 
 group 'com.github.tonybaines'
@@ -12,6 +37,7 @@ repositories {
     mavenCentral()
     jcenter()
 }
+
 
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
@@ -24,9 +50,7 @@ dependencies {
 
 }
 
-vertx {
-    mainVerticle = 'com.github.tonybaines.metrics.HttpServer'
-}
+vertx.mainVerticle = 'com.github.tonybaines.metrics.HttpServer'
 
 test {
     useJUnitPlatform()
