@@ -7,6 +7,7 @@ import java.time.Instant
 
 
 sealed class MetricRecord {
+    abstract fun asJson(): String
     companion object {
         fun from(line: String): Try<out MetricRecord> =
             CarbonMetric.from(line)
@@ -61,6 +62,9 @@ sealed class MetricRecord {
 
             private val CARBON_TAG_VALUE_PATTERN = """[_+%\-/\w]+""".toRegex()
         }
+
+        override fun asJson(): String =
+            """{ "timestamp":"${this.timestamp}", "id":${this.intrinsicTags.asJson()} , "value":"${this.value.value}", "tags":${this.metaTags.asJson()} }"""
     }
 
     data class GraphiteMetric(
@@ -93,6 +97,10 @@ sealed class MetricRecord {
                 .split(';')
                 .asTags()
         }
+
+        override fun asJson(): String =
+            """{ "timestamp":"${this.timestamp}", "id":{ "name":"${this.id}" }, "value":"${this.value.value}", "tags":${this.tags.asJson()} }"""
+
     }
 }
 

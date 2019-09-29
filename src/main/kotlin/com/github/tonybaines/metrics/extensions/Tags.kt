@@ -31,3 +31,8 @@ private val INTRINSIC_TAGS = setOf("unit", "mtype")
 fun Tags.ensureComplete(): Tags =
     if (this.keys.containsAll(INTRINSIC_TAGS)) this
     else throw IllegalArgumentException("Required keys $INTRINSIC_TAGS not found in ${this.keys}")
+
+
+// JSON
+
+fun Tags.asJson() = """{${this.map { """ "${it.key}": "${it.value}" """ }.joinToString(",")}}"""
