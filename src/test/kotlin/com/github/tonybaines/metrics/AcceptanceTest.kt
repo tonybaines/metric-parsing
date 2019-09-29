@@ -14,7 +14,7 @@ class AcceptanceTest {
     fun `can parse a file with a mix of valid and invalid records`() {
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/raw-metrics-data.txt"))
 
-        expectThat(parser.validRecords())
+        expectThat(parser.validRecords().toList())
             .hasSize(7)
     }
 
@@ -22,7 +22,7 @@ class AcceptanceTest {
     fun `can parse a file containing only valid basic graphite format records`() {
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/basic-graphite-valid.txt"))
 
-        expectThat(parser.validRecords()).containsExactlyInAnyOrder(
+        expectThat(parser.validRecords().toList()).containsExactlyInAnyOrder(
             MetricRecord.GraphiteMetric(
                 id = "some.metric.name",
                 value = Value.LongValue(1234),
@@ -42,7 +42,7 @@ class AcceptanceTest {
     fun `can parse a file containing only valid graphite format records with tags`() {
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/graphite-valid-with-tags.txt"))
 
-        expectThat(parser.validRecords()).containsExactly(
+        expectThat(parser.validRecords().toList()).containsExactly(
             MetricRecord.GraphiteMetric(
                 id = "some.metric.name",
                 value = Value.LongValue(1234),
@@ -62,7 +62,7 @@ class AcceptanceTest {
     fun `can parse a file containing only valid carbon 2_0 format records`() {
         val parser: MetricParser = MetricParser.readingFrom(File("src/test/resources/carbon-format.txt"))
 
-        expectThat(parser.validRecords()).containsExactly(
+        expectThat(parser.validRecords().toList()).containsExactly(
             MetricRecord.CarbonMetric(
                 intrinsicTags = mapOf("mtype" to "rate", "unit" to "Req/s", "site" to "mydomain", "host" to "web12"),
                 metaTags = mapOf("agent" to "statsdaemon1"),

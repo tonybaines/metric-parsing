@@ -1,23 +1,25 @@
 package com.github.tonybaines.metrics
 
 import com.github.tonybaines.metrics.extensions.*
-import io.vavr.control.Try
+import io.vavr.control.Validation
 import io.vavr.kotlin.`try`
 import java.time.Instant
 
 
 sealed class MetricRecord {
     abstract fun asJson(): String
-    companion object {
-        fun from(line: String): Try<out MetricRecord> =
-            CarbonMetric.from(line)
-                .orElse { GraphiteMetric.from(line) }
 
-        private val VALID_METRIC_NAME_PATTERN = """[a-zA-Z]+[_+%\-\w.]+""".toRegex()
+    companion object {
+        fun from(line: String): Validation<Failure, out MetricRecord> {
+            return if (line.matches(LOOKS_LIKE_A_CARBON_LINE)) CarbonMetric.from(line)
+            else GraphiteMetric.from(line)
+        }
+
+        private val LOOKS_LIKE_A_CARBON_LINE = """^[a-zA-Z]+[_+%\-\w]*=.+$""".toRegex()
+        private val VALID_METRIC_NAME_PATTERN = """[a-zA-Z]+[_+%\-\w.]*""".toRegex()
         private fun String.ensureValidMetricName(): String =
             if (this.matches(VALID_METRIC_NAME_PATTERN)) this
             else throw IllegalArgumentException("'$this' is not a valid value for a tag name")
-
     }
 
     data class CarbonMetric(
@@ -32,15 +34,17 @@ sealed class MetricRecord {
             intrinsicTags.validateTags(CARBON_TAG_VALUE_PATTERN)
             metaTags.validateTags(CARBON_TAG_VALUE_PATTERN)
         }
+
         companion object {
-            fun from(line: String): Try<MetricRecord> =
+            fun from(line: String): Validation<Failure, out MetricRecord> =
                 `try` {
                     val startOfMetaTags = line.indexOf("  ")
                     val hasMetaTags = (startOfMetaTags > 0) && (startOfMetaTags < line.length)
 
                     if (hasMetaTags) {
-                        val intrinsicTags = line.substring(0..startOfMetaTags).split(' ')
-                        val metaAndRest = line.substring(startOfMetaTags).split(' ').reversed()
+                        val intrinsicTags = line.substring(0..startOfMetaTags).split(' ').filter(String::isNotBlank)
+                        val metaAndRest =
+                            line.substring(startOfMetaTags).split(' ').reversed().filter(String::isNotBlank)
                         val metaTags = metaAndRest.drop(2)
                         CarbonMetric(
                             timestamp = metaAndRest[0].toInstant(),
@@ -49,7 +53,7 @@ sealed class MetricRecord {
                             metaTags = metaTags.asTags()
                         )
                     } else {
-                        val intrinsicAndRest = line.split(' ').reversed()
+                        val intrinsicAndRest = line.split(' ').reversed().filter(String::isNotBlank)
                         val intrinsicTags = intrinsicAndRest.drop(2)
                         CarbonMetric(
                             timestamp = intrinsicAndRest[0].toInstant(),
@@ -58,7 +62,7 @@ sealed class MetricRecord {
                             metaTags = mapOf()
                         )
                     }
-                }
+                }.toValidation { e -> Failure(line, e) }
 
             private val CARBON_TAG_VALUE_PATTERN = """[_+%\-/\w]+""".toRegex()
         }
@@ -78,8 +82,9 @@ sealed class MetricRecord {
             id.ensureValidMetricName()
             tags.validateTags(valuePattern = GRAPHITE_TAG_VALUE_PATTERN)
         }
+
         companion object {
-            fun from(line: String): Try<MetricRecord> =
+            fun from(line: String): Validation<Failure, out MetricRecord> =
                 `try` {
                     val fields = line.split(' ')
                     GraphiteMetric(
@@ -88,7 +93,7 @@ sealed class MetricRecord {
                         timestamp = fields[2].toInstant(),
                         tags = fields[0].extractTags()
                     )
-                }
+                }.toValidation { e -> Failure(line, e) }
 
             private fun String.withoutTags(): String = this.takeWhile { it != ';' }
 

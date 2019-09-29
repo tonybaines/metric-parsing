@@ -3,9 +3,11 @@ package com.github.tonybaines.metrics
 import com.github.tonybaines.metrics.MetricRecord.CarbonMetric
 import com.github.tonybaines.metrics.Value.LongValue
 import com.github.tonybaines.metrics.extensions.Tags
+import io.vavr.control.Validation
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.api.expectThrows
+import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import java.time.Instant
 
@@ -33,6 +35,12 @@ internal class CarbonMetricTest {
                     value = LongValue(234)
                 )
             )
+    }
+
+    @Test
+    fun `fails to parse a line with an invalid tag value`() {
+        expectThat(MetricRecord.from("site=mydom|ain mtype=rate host=web12  agent=statsdaemon1 234 1560852124"))
+            .isA<Validation.Invalid<Failure, MetricRecord>>()
     }
 
     @Test

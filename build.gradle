@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.50'
     id 'com.github.johnrengelman.shadow' version '5.1.0'
+    id 'com.adarshr.test-logger' version '1.7.0'
 }
 
 group 'com.github.tonybaines'
@@ -11,21 +12,6 @@ repositories {
     jcenter()
 }
 
-test {
-    useJUnitPlatform()
-}
-
-jar {
-    manifest {
-        attributes(
-                'Main-Class': 'com.github.tonybaines.metrics.Main'
-        )
-    }
-}
-
-// Shadow == Shade - 'Fat' jar with all dependencies included
-assemble.dependsOn('shadowJar')
-
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
     implementation 'io.vavr:vavr-kotlin:0.10.0'
@@ -35,6 +21,25 @@ dependencies {
     testImplementation 'org.skyscreamer:jsonassert:1.5.0'
 
 }
+
+test {
+    useJUnitPlatform()
+}
+
+testlogger {
+    theme 'mocha'
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.github.tonybaines.metrics.Main'
+        )
+    }
+}
+
+// Shadow == Shade - 'Fat' jar with all dependencies included
+assemble.dependsOn('shadowJar')
 
 compileKotlin {
     kotlinOptions.jvmTarget = "11"

@@ -15,7 +15,7 @@ fun Tags.validateTags(valuePattern: Regex): Tags =
     }
 
 
-private val VALID_TAG_NAME_PATTERN = """[a-zA-Z]+[_+%\-\w]+""".toRegex()
+private val VALID_TAG_NAME_PATTERN = """[a-zA-Z]+[_+%\-\w]*""".toRegex()
 private fun String.ensureValidTagName(): String =
     if (this.matches(VALID_TAG_NAME_PATTERN)) this
     else throw IllegalArgumentException("'$this' is not a valid value for a tag name")
