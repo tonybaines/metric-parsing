@@ -16,9 +16,12 @@ test {
 
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    implementation 'io.vavr:vavr-kotlin:0.10.0'
+
     testImplementation 'org.junit.jupiter:junit-jupiter:5.5.2'
     testImplementation 'io.strikt:strikt-core:0.22.2'
-    compile 'io.vavr:vavr-kotlin:0.10.0'
+    testImplementation 'org.skyscreamer:jsonassert:1.5.0'
+
 }
 
 compileKotlin {
