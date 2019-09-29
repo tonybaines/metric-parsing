@@ -15,6 +15,7 @@ sealed class MetricRecord {
             else GraphiteMetric.from(line)
         }
 
+        /** Line starts with a valid tag name, followed by an equals */
         private val LOOKS_LIKE_A_CARBON_LINE = """^[a-zA-Z]+[_+%\-\w]*=.+$""".toRegex()
         private val VALID_METRIC_NAME_PATTERN = """[a-zA-Z]+[_+%\-\w.]*""".toRegex()
         private fun String.ensureValidMetricName(): String =
