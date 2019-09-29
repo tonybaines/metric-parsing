@@ -2,9 +2,7 @@
 buildscript {
     repositories {
         mavenLocal()
-        maven {
-            url = "http://jcenter.bintray.com"
-        }
+        maven { url = "http://jcenter.bintray.com" }
     }
     dependencies {
         classpath 'se.transmode.gradle:gradle-docker:1.2'
@@ -19,17 +17,6 @@ plugins {
 
 apply plugin: 'docker'
 
-docker {
-    baseImage = 'openjdk:11-jre'
-    useApi = false
-}
-
-distDocker {
-    exposePort(8080)
-    entryPoint(['metric-parsing-1.0-SNAPSHOT/bin/metric-parsing'])
-    defaultCommand(['run', 'com.github.tonybaines.metrics.HttpServer'])
-}
-
 group 'com.github.tonybaines'
 version '1.0-SNAPSHOT'
 
@@ -37,7 +24,6 @@ repositories {
     mavenCentral()
     jcenter()
 }
-
 
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
@@ -47,10 +33,23 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.5.2'
     testImplementation 'io.strikt:strikt-core:0.22.2'
     testImplementation 'org.skyscreamer:jsonassert:1.5.0'
-
 }
 
-vertx.mainVerticle = 'com.github.tonybaines.metrics.HttpServer'
+project.ext {
+    verticle = 'com.github.tonybaines.metrics.HttpServer'
+}
+
+docker {
+    baseImage = 'openjdk:11-jre'
+    useApi = false
+}
+
+distDocker {
+    exposePort(8080)
+    defaultCommand(['run', "${project.ext.verticle}"])
+}
+
+vertx.mainVerticle = project.ext.verticle
 
 test {
     useJUnitPlatform()
