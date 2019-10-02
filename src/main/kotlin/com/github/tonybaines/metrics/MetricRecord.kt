@@ -17,10 +17,6 @@ sealed class MetricRecord {
 
         /** Line starts with a valid tag name, followed by an equals */
         private val LOOKS_LIKE_A_CARBON_LINE = """^[a-zA-Z]+[_+%\-\w]*=.+$""".toRegex()
-        private val VALID_METRIC_NAME_PATTERN = """[a-zA-Z]+[_+%\-\w.]*""".toRegex()
-        private fun String.ensureValidMetricName(): String =
-            if (this.matches(VALID_METRIC_NAME_PATTERN)) this
-            else throw IllegalArgumentException("'$this' is not a valid value for a tag name")
     }
 
     data class CarbonMetric(
@@ -102,6 +98,11 @@ sealed class MetricRecord {
             private fun String.extractTags(): Tags = this
                 .split(';')
                 .asTags()
+
+            private val VALID_METRIC_NAME_PATTERN = """[a-zA-Z]+[_+%\-\w.]*""".toRegex()
+            private fun String.ensureValidMetricName(): String =
+                if (this.matches(VALID_METRIC_NAME_PATTERN)) this
+                else throw IllegalArgumentException("'$this' is not a valid value for a tag name")
         }
 
         override fun asJson(): String =
